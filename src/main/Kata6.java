@@ -9,6 +9,9 @@ import kata6.model.Histogram;
 import kata6.model.Mail;
 import kata6.view.MailHistogramBuilder;
 import kata6.view.MailListReader;
+import java.sql.SQLException;
+import kata6.model.Person;
+import kata6.view.DataBaseList;
 
 public class Kata6 {
     public static void main(String[] args) throws IOException, Exception {
@@ -23,6 +26,8 @@ public class Kata6 {
     private MailHistogramBuilder<Mail> builder;
     private Histogram<String> domains;
     private Histogram<Character> letters;
+    private Histogram<Character> gender;
+    private  List<Person> people;
         
     private void execute() throws Exception{
         input();
@@ -36,12 +41,20 @@ public class Kata6 {
         builder = new MailHistogramBuilder<Mail>(mailList);
     }
   
-    private void process(){
+    private void process()throws ClassNotFoundException, SQLException{
         domains = builder.build(new Attribute<Mail, String>() {
         @Override
         public String get(Mail item) {
             return item.getMail().split("@")[1];
         }
+    });
+    people = DataBaseList.read();
+    MailHistogramBuilder<Person> builderPerson = new MailHistogramBuilder<>(people);
+    gender = builderPerson.build(new Attribute<Person,Character>() {
+        @Override
+        public Character get(Person item) {
+            return item.getGender();
+         }
     });
         
     letters = builder.build(new Attribute<Mail, Character>() {
@@ -56,6 +69,7 @@ public class Kata6 {
         histoDisplay = new HistogramDisplay(histogram);
         new HistogramDisplay(domains, "Dominios").execute();
         new HistogramDisplay (letters,"Primer Caracter").execute();
+        new HistogramDisplay (gender,"Gender").execute();
         histoDisplay.execute();
     }
 }
